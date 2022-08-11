@@ -11,13 +11,24 @@ namespace BankAccount.Tests
     [TestClass()]
     public class AccountTests
     {
-        [TestMethod()]
-        public void DepositAPositiveAmount_AddToBalance()
-        {
-            Account acc = new ("J Doe");
-            acc.Deposit(100);
+        private Account acc;
 
-            Assert.AreEqual(100, acc.Balance);
+        [TestInitialize] // run before tests so we have a fresh accoutn before each test
+        public void CreateDefaultAccount()
+        {
+            acc = new Account("J. Doe");
+        }
+
+        [TestMethod()]
+        [DataRow(100)]
+        [DataRow(.01)]
+        [DataRow(1.99)]
+        [DataRow(9_999.99)]
+        public void DepositAPositiveAmount_AddToBalance(double depositAmount)
+        {
+            acc.Deposit(depositAmount);
+
+            Assert.AreEqual(depositAmount, acc.Balance);
         }
 
         [TestMethod]
@@ -26,7 +37,6 @@ namespace BankAccount.Tests
         {
             // AAA - Arrange Act Assert
             // Arrange is getting all varibles together
-            Account acc = new Account("J. Doe");
             double depositAmount = 100;
             double expectedReturn = 100;
 
@@ -35,6 +45,40 @@ namespace BankAccount.Tests
 
             // Assert
             Assert.AreEqual(expectedReturn, returnValue);
+        }
+
+        [TestMethod]
+        [DataRow(-1)] // calls test with a piece of informations
+        [DataRow(0)]
+        public void Deposit_ZeroOrLess_ThrowArgumentException(double invalidDepositAmount)
+        {
+
+            //Assert => Act - calling the method
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => acc.Deposit(invalidDepositAmount));
+
+            //Assert
+        }
+
+        // Withdrawing a positive amount - decrease balance
+        // Withdrawing 0 - Throws ArgumentOutRange exception
+        // Withdrawing negative amount - Throws ArgumentOutOfRange exception
+        // Withdrawing more than balance - ArgumentEXception
+        [TestMethod]
+        public void Withdraw_PostitiveAmount_DecreaseBalance()
+        {
+            // Arrange
+            double initialDeposit = 100;
+            double withdrawlAmount = 50;
+            double expectedBalance = initialDeposit - withdrawlAmount;
+
+            // Act
+            acc.Deposit(initialDeposit);
+            acc.Withdraw(withdrawlAmount);
+
+            double actualBalance = acc.Balance;
+
+            // Assert
+            Assert.AreEqual(expectedBalance, actualBalance); ;
         }
     }
 }
