@@ -16,7 +16,7 @@ namespace BankAccount.Tests
         [TestInitialize] // run before tests so we have a fresh accoutn before each test
         public void CreateDefaultAccount()
         {
-            acc = new Account("J. Doe");
+            acc = new Account("Jade Doe");
         }
 
         [TestMethod()]
@@ -24,6 +24,7 @@ namespace BankAccount.Tests
         [DataRow(.01)]
         [DataRow(1.99)]
         [DataRow(9_999.99)]
+        [TestCategory("Deposit")]
         public void DepositAPositiveAmount_AddToBalance(double depositAmount)
         {
             acc.Deposit(depositAmount);
@@ -32,7 +33,7 @@ namespace BankAccount.Tests
         }
 
         [TestMethod]
-
+        [TestCategory("Deposit")]
         public void Deposit_APositiveAmount_ReturnUpdatedBalance()
         {
             // AAA - Arrange Act Assert
@@ -50,6 +51,7 @@ namespace BankAccount.Tests
         [TestMethod]
         [DataRow(-1)] // calls test with a piece of informations
         [DataRow(0)]
+        [TestCategory("Deposit")]
         public void Deposit_ZeroOrLess_ThrowArgumentException(double invalidDepositAmount)
         {
 
@@ -64,6 +66,7 @@ namespace BankAccount.Tests
         // Withdrawing negative amount - Throws ArgumentOutOfRange exception
         // Withdrawing more than balance - ArgumentEXception
         [TestMethod]
+        [TestCategory("Withdrawl")]
         public void Withdraw_PostitiveAmount_DecreaseBalance()
         {
             // Arrange
@@ -82,24 +85,79 @@ namespace BankAccount.Tests
         }
 
         [TestMethod]
-        public void Withdraw_PositiveAmount_ReturnsUpdatedBalance()
+        [DataRow(100, 50)]
+        [TestCategory("Withdrawl")]
+        public void Withdraw_PositiveAmount_ReturnsUpdatedBalance(double initialDeposit, double withdrawlAmount)
         {
-            Assert.Fail();
+            // deposit some money so i can withdraw
+            //Arrange
+            double expectedBalance = initialDeposit - withdrawlAmount;
+            acc.Deposit(initialDeposit);
+
+            //Act
+            double returnedBalance = acc.Withdraw(withdrawlAmount);
+
+            //Assert
+            Assert.AreEqual(expectedBalance, returnedBalance);
+
         }
 
         [TestMethod]
         [DataRow(0)]
         [DataRow(-.01)]
         [DataRow(-1000)]
-        public void Withdraw_ZeroOrLess_ThrowsArgumentOutOfRangeException()
+        [TestCategory("Withdrawl")]
+        //[Priority()] // can test tests by priority so can make 
+        public void Withdraw_ZeroOrLess_ThrowsArgumentOutOfRangeException(double withDrawlAmount)
         {
-            Assert.Fail();
+            // if thorws any of these amounts will throw exception
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => acc.Withdraw(withDrawlAmount));
         }
 
         [TestMethod]
+        [TestCategory("Withdrawl")]
         public void Withdrawl_MoreThanAvaliableBalance_ThrowsArgumentException()
         {
-            Assert.Fail();
+            double withdrawlAmount = 1000;
+
+            Assert.ThrowsException<ArgumentException>(() => acc.Withdraw(withdrawlAmount));
+        }
+
+        [TestMethod]
+        public void Owner_SetAsNull_ThrowsArgumentNullException()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() => acc.Owner = null);
+        }
+
+        [TestMethod]
+        public void Owner_SetAsWhiteSpaceOrEmptyString_ThrowsArgumentException()
+        {
+            Assert.ThrowsException<ArgumentException>(() => acc.Owner = String.Empty);
+            Assert.ThrowsException<ArgumentException>(() => acc.Owner = "   ");
+            
+        }
+
+        [TestMethod]
+        [DataRow("Jade")]
+        [DataRow("Jade Ferguson")]
+        [DataRow("Jade Ferguson Strife")]
+        public void Owner_SetAsUpTo20Characters_SetsSuccessfully(string ownerName)
+        {
+            acc.Owner = ownerName;
+            Assert.AreEqual(ownerName, acc.Owner);
+        }
+
+        [TestMethod]
+        [DataRow("Joe 3rd")]
+        [DataRow("Jade Ferguson Strifes")]
+        [DataRow("#$%&")]
+        public void Owner_IvalidOwnerName_ThrowsArgumentException(string ownerName)
+        {
+            Assert.ThrowsException<ArgumentException>(() => acc.Owner = ownerName);
         }
     }
 }
+
+// [TestCategory("Withdrawl")] is a category
+// Can sort tests and see them in the test expolorer
+// so do group by, traits
